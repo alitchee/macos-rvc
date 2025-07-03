@@ -90,7 +90,7 @@ echo "已配置终端网络代理127.0.0.1:10887，请确保代理有效"
 #先降级pip
 pip install --upgrade "pip<24.1"
 #安装pytorch-cpu版本,version<2.6，否则代码不兼容，因此先安装。对于macos,默认安装cpu版本
-pip install torch==2.5.1 torchvision torchaudio \
+pip install torch==2.1.2  torchaudio \
   --index-url https://download.pytorch.org/whl/cpu
 #安装依赖
 pip install -r "./requirements.txt" 

@@ -993,10 +993,34 @@ if __name__ == "__main__":
             if "privateuseone" in str(self.config.device) or not self.gui_config.use_pv:
                 # infer_wav[: self.sola_buffer_frame] *= self.fade_in_window
                 #modify-1
-                infer_wav[:self.sola_buffer_frame] *= self.fade_in_window[:self.sola_buffer_frame]
-                infer_wav[: self.sola_buffer_frame] += (
-                    self.sola_buffer * self.fade_out_window
-                )
+                # infer_wav[:self.sola_buffer_frame] *= self.fade_in_window[:self.sola_buffer_frame]
+                # infer_wav[: self.sola_buffer_frame] += (
+                #     self.sola_buffer * self.fade_out_window
+                # )
+                n_available = min(self.sola_buffer_frame, len(infer_wav))
+                if n_available > 0:
+                    if "privateuseone" in str(self.config.device) or not self.gui_config.use_pv:
+                        # 应用部分淡入效果到可用采样点
+                        partial_fade_in = self.fade_in_window[:n_available]
+                        partial_fade_out = self.fade_out_window[:n_available]
+                        
+                        infer_wav[:n_available] = infer_wav[:n_available] * partial_fade_in + \
+                                                self.sola_buffer[:n_available] * partial_fade_out
+                    else:
+                        # 对于相位声码器同样需要处理长度不足的情况
+                        if n_available == self.sola_buffer_frame:
+                            infer_wav[: self.sola_buffer_frame] = phase_vocoder(
+                                self.sola_buffer,
+                                infer_wav[: self.sola_buffer_frame],
+                                self.fade_out_window,
+                                self.fade_in_window,
+                            )
+                        else:
+                            # 长度不足时退回到普通淡入淡出
+                            partial_fade_in = self.fade_in_window[:n_available]
+                            partial_fade_out = self.fade_out_window[:n_available]
+                            infer_wav[:n_available] = infer_wav[:n_available] * partial_fade_in + \
+                                                    self.sola_buffer[:n_available] * partial_fade_out
             else:
                 infer_wav[: self.sola_buffer_frame] = phase_vocoder(
                     self.sola_buffer,
@@ -1004,9 +1028,28 @@ if __name__ == "__main__":
                     self.fade_out_window,
                     self.fade_in_window,
                 )
-            self.sola_buffer[:] = infer_wav[
-                self.block_frame : self.block_frame + self.sola_buffer_frame
-            ]
+            # self.sola_buffer[:] = infer_wav[
+            #     self.block_frame : self.block_frame + self.sola_buffer_frame
+            # ]
+            required_length = self.block_frame + self.sola_buffer_frame
+            if len(infer_wav) >= required_length:
+                # 有足够数据，正常复制
+                self.sola_buffer[:] = infer_wav[
+                    self.block_frame : self.block_frame + self.sola_buffer_frame
+                ]
+            else:
+                # 数据不足时，计算实际可用长度
+                available = len(infer_wav) - self.block_frame
+                if available > 0:
+                    # 复制可用部分
+                    self.sola_buffer[:available] = infer_wav[self.block_frame : self.block_frame + available]
+                    # 剩余部分填零
+                    self.sola_buffer[available:] = 0
+                else:
+                    # 连一个样本都没有，全部填零
+                    self.sola_buffer[:] = 0
+                print(f"⚠️ 警告: 音频数据不足 ({len(infer_wav)} < {required_length})，已安全处理")
+
             outdata[:] = (
                 infer_wav[: self.block_frame]
                 .repeat(self.gui_config.channels, 1)
