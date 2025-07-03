@@ -116,7 +116,7 @@ if __name__ == "__main__":
             self.pth_path: str = ""
             self.index_path: str = ""
             self.pitch: int = 0
-            self.formant=0.0
+            self.formant = 0.0
             self.sr_type: str = "sr_model"
             self.block_time: float = 0.25  # s
             self.threhold: int = -60
@@ -659,7 +659,7 @@ if __name__ == "__main__":
             if len(values["index_path"].strip()) == 0:
                 sg.popup(i18n("请选择index文件"))
                 return False
-            pattern = re.compile("[^\x00-\x7F]+")
+            pattern = re.compile("[^\x00-\x7f]+")
             if pattern.findall(values["pth_path"]):
                 sg.popup(i18n("pth文件路径不可包含中文"))
                 return False
@@ -854,7 +854,7 @@ if __name__ == "__main__":
             global flag_vc
             start_time = time.perf_counter()
             indata = librosa.to_mono(indata.T)
-                # 🔹静音检测逻辑插入点 ①（在 librosa 增强前）
+            # 🔹静音检测逻辑插入点 ①（在 librosa 增强前）
             # if np.abs(indata).mean() < 1e-4:
             #     print("⛔️ 检测到静音或无效输入，跳过该帧")
             #     outdata[:] = np.zeros_like(outdata)
@@ -979,10 +979,10 @@ if __name__ == "__main__":
                 + 1e-8
             )
             if sys.platform == "darwin":
-                    # 需要指定dim，假设维度是0或1，先打印确认下形状
+                # 需要指定dim，假设维度是0或1，先打印确认下形状
                 # tensor = cor_nom[0, 0] / cor_den[0, 0]
                 # print("❌❌tensor shape:", tensor.shape)
-                #原代码采集音频是报0张量错误--------------litchee-----2025.06.01--
+                # 原代码采集音频是报0张量错误--------------litchee-----2025.06.01--
                 # _, sola_offset = torch.max(cor_nom[0, 0] / cor_den[0, 0])
                 _, sola_offset = torch.max(cor_nom[0, 0] / cor_den[0, 0], dim=0)
                 sola_offset = sola_offset.item()
@@ -992,20 +992,25 @@ if __name__ == "__main__":
             infer_wav = infer_wav[sola_offset:]
             if "privateuseone" in str(self.config.device) or not self.gui_config.use_pv:
                 # infer_wav[: self.sola_buffer_frame] *= self.fade_in_window
-                #modify-1
+                # modify-1
                 # infer_wav[:self.sola_buffer_frame] *= self.fade_in_window[:self.sola_buffer_frame]
                 # infer_wav[: self.sola_buffer_frame] += (
                 #     self.sola_buffer * self.fade_out_window
                 # )
                 n_available = min(self.sola_buffer_frame, len(infer_wav))
                 if n_available > 0:
-                    if "privateuseone" in str(self.config.device) or not self.gui_config.use_pv:
+                    if (
+                        "privateuseone" in str(self.config.device)
+                        or not self.gui_config.use_pv
+                    ):
                         # 应用部分淡入效果到可用采样点
                         partial_fade_in = self.fade_in_window[:n_available]
                         partial_fade_out = self.fade_out_window[:n_available]
-                        
-                        infer_wav[:n_available] = infer_wav[:n_available] * partial_fade_in + \
-                                                self.sola_buffer[:n_available] * partial_fade_out
+
+                        infer_wav[:n_available] = (
+                            infer_wav[:n_available] * partial_fade_in
+                            + self.sola_buffer[:n_available] * partial_fade_out
+                        )
                     else:
                         # 对于相位声码器同样需要处理长度不足的情况
                         if n_available == self.sola_buffer_frame:
@@ -1019,8 +1024,10 @@ if __name__ == "__main__":
                             # 长度不足时退回到普通淡入淡出
                             partial_fade_in = self.fade_in_window[:n_available]
                             partial_fade_out = self.fade_out_window[:n_available]
-                            infer_wav[:n_available] = infer_wav[:n_available] * partial_fade_in + \
-                                                    self.sola_buffer[:n_available] * partial_fade_out
+                            infer_wav[:n_available] = (
+                                infer_wav[:n_available] * partial_fade_in
+                                + self.sola_buffer[:n_available] * partial_fade_out
+                            )
             else:
                 infer_wav[: self.sola_buffer_frame] = phase_vocoder(
                     self.sola_buffer,
@@ -1042,13 +1049,17 @@ if __name__ == "__main__":
                 available = len(infer_wav) - self.block_frame
                 if available > 0:
                     # 复制可用部分
-                    self.sola_buffer[:available] = infer_wav[self.block_frame : self.block_frame + available]
+                    self.sola_buffer[:available] = infer_wav[
+                        self.block_frame : self.block_frame + available
+                    ]
                     # 剩余部分填零
                     self.sola_buffer[available:] = 0
                 else:
                     # 连一个样本都没有，全部填零
                     self.sola_buffer[:] = 0
-                print(f"⚠️ 警告: 音频数据不足 ({len(infer_wav)} < {required_length})，已安全处理")
+                print(
+                    f"⚠️ 警告: 音频数据不足 ({len(infer_wav)} < {required_length})，已安全处理"
+                )
 
             outdata[:] = (
                 infer_wav[: self.block_frame]
@@ -1111,9 +1122,9 @@ if __name__ == "__main__":
         def get_device_samplerate(self):
             return int(
                 sd.query_devices(device=sd.default.device[0])["default_samplerate"]
-        
             )
-#重写函数
+
+        # 重写函数
         # def get_device_samplerate(self):
         #     try:
         #         info = sd.query_devices(device=sd.default.device[0])
@@ -1125,7 +1136,7 @@ if __name__ == "__main__":
         #     except Exception as e:
         #         print("[错误] 获取设备采样率失败：", e)
         #         return 44100  # fallback
-       
+
         def get_device_channels(self):
             max_input_channels = sd.query_devices(device=sd.default.device[0])[
                 "max_input_channels"

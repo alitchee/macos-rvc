@@ -1,4 +1,3 @@
-
 import os
 import sys
 from dotenv import load_dotenv
@@ -111,7 +110,7 @@ if __name__ == "__main__":
             self.pth_path: str = ""
             self.index_path: str = ""
             self.pitch: int = 0
-            self.formant=0.0
+            self.formant = 0.0
             self.sr_type: str = "sr_model"
             self.block_time: float = 0.25  # s
             self.threhold: int = -60
@@ -168,12 +167,12 @@ if __name__ == "__main__":
                             data["sg_input_device"] = self.input_devices[
                                 self.input_devices_indices.index(sd.default.device[0])
                             ]
-                            data["sg_output_device"] = self.output_devices[ 
+                            data["sg_output_device"] = self.output_devices[
                                 self.output_devices_indices.index(sd.default.device[1])
                             ]
                     else:
                         data["sg_hostapi"] = self.hostapis[0]
-                        data["sg_input_device"] = self.input_devices[ 
+                        data["sg_input_device"] = self.input_devices[
                             self.input_devices_indices.index(sd.default.device[0])
                         ]
                         data["sg_output_device"] = self.output_devices[
@@ -186,10 +185,10 @@ if __name__ == "__main__":
                         "index_path": "",
                         "sg_hostapi": self.hostapis[0],
                         "sg_wasapi_exclusive": False,
-                        "sg_input_device": self.input_devices[ 
+                        "sg_input_device": self.input_devices[
                             self.input_devices_indices.index(sd.default.device[0])
                         ],
-                        "sg_output_device": self.output_devices[ 
+                        "sg_output_device": self.output_devices[
                             self.output_devices_indices.index(sd.default.device[1])
                         ],
                         "sr_type": "sr_model",
@@ -312,7 +311,7 @@ if __name__ == "__main__":
                         ],
                         title=i18n("音频设备"),
                     )
-                ]
+                ],
             ]
 
             self.window = sg.Window("RVC - GUI", layout=layout, finalize=True)

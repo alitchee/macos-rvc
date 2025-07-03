@@ -5,6 +5,7 @@ import traceback
 from infer.lib import jit
 from infer.lib.jit.get_synthesizer import get_synthesizer
 from time import time as ttime
+
 # import fairseq
 import fairseq.data.dictionary
 import faiss
@@ -17,9 +18,10 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torchcrepe
 from torchaudio.transforms import Resample
-#修改  PyTorch 2.6, we changed the default value of the `weights_only` argument in `torch.load` from `False` to `True
-#无法加载模型文件而修改 25.6.5-ty
-#torch.serialization.add_safe_globals([fairseq.data.dictionary.Dictionary])
+
+# 修改  PyTorch 2.6, we changed the default value of the `weights_only` argument in `torch.load` from `False` to `True
+# 无法加载模型文件而修改 25.6.5-ty
+# torch.serialization.add_safe_globals([fairseq.data.dictionary.Dictionary])
 
 now_dir = os.getcwd()
 sys.path.append(now_dir)
@@ -100,12 +102,11 @@ class RVC:
             self.resample_kernel = {}
 
             if last_rvc is None:
-                #解决pytorch版本>2.6兼容性改动，低版本不需要。
-                #with torch.serialization.safe_globals([fairseq.data.dictionary.Dictionary]):
+                # 解决pytorch版本>2.6兼容性改动，低版本不需要。
+                # with torch.serialization.safe_globals([fairseq.data.dictionary.Dictionary]):
                 models, _, _ = fairseq.checkpoint_utils.load_model_ensemble_and_task(
                     ["assets/hubert/hubert_base.pt"],
                     suffix="",
-
                 )
                 hubert_model = models[0]
                 hubert_model = hubert_model.to(self.device)
@@ -412,7 +413,10 @@ class RVC:
             if f0method == "rmvpe":
                 f0_extractor_frame = 5120 * ((f0_extractor_frame - 1) // 5120 + 1) - 160
             pitch, pitchf = self.get_f0(
-                input_wav[-f0_extractor_frame:], self.f0_up_key - self.formant_shift, self.n_cpu, f0method
+                input_wav[-f0_extractor_frame:],
+                self.f0_up_key - self.formant_shift,
+                self.n_cpu,
+                f0method,
             )
             shift = block_frame_16k // 160
             self.cache_pitch[:-shift] = self.cache_pitch[shift:].clone()
@@ -420,7 +424,9 @@ class RVC:
             self.cache_pitch[4 - pitch.shape[0] :] = pitch[3:-1]
             self.cache_pitchf[4 - pitch.shape[0] :] = pitchf[3:-1]
             cache_pitch = self.cache_pitch[None, -p_len:]
-            cache_pitchf = self.cache_pitchf[None, -p_len:] * return_length2 / return_length
+            cache_pitchf = (
+                self.cache_pitchf[None, -p_len:] * return_length2 / return_length
+            )
         t4 = ttime()
         feats = F.interpolate(feats.permute(0, 2, 1), scale_factor=2).permute(0, 2, 1)
         feats = feats[:, :p_len, :]

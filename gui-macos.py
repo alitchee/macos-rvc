@@ -1,6 +1,7 @@
 import torch
 import os
 import argparse
+
 a = "/Users/ty/Documents/Retrieval-based-Voice-Conversion-WebUI-main/assets/weights/"
 input_path = a + "wendi.pth"
 output_path = a + "wendimodify.pth"
@@ -12,12 +13,14 @@ output_path = a + "wendimodify.pth"
 
 # print(model_data.get("sr", {}))
 
+
 def add_tgt_sr(data):
     if isinstance(data, dict):
         if "sr" in data and "tgt_sr" not in data:
             data["tgt_sr"] = data["sr"]
         for v in data.values():
             add_tgt_sr(v)
+
 
 def main():
     if not os.path.isfile(input_path):
@@ -30,11 +33,12 @@ def main():
     torch.save(data, output_path)
     print(f"✅ 已保存新模型: {output_path}")
 
+
 if __name__ == "__main__":
     main()
 
 
-#修改 sr 为 tgt_sr
+# 修改 sr 为 tgt_sr
 # def fix_sr_to_tgt_sr(model_path, output_path):
 #     data = torch.load(model_path, map_location="cpu")
 #     if "tgt_sr" not in data and "sr" in data:

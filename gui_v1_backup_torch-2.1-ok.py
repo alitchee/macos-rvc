@@ -116,7 +116,7 @@ if __name__ == "__main__":
             self.pth_path: str = ""
             self.index_path: str = ""
             self.pitch: int = 0
-            self.formant=0.0
+            self.formant = 0.0
             self.sr_type: str = "sr_model"
             self.block_time: float = 0.25  # s
             self.threhold: int = -60
@@ -659,7 +659,7 @@ if __name__ == "__main__":
             if len(values["index_path"].strip()) == 0:
                 sg.popup(i18n("请选择index文件"))
                 return False
-            pattern = re.compile("[^\x00-\x7F]+")
+            pattern = re.compile("[^\x00-\x7f]+")
             if pattern.findall(values["pth_path"]):
                 sg.popup(i18n("pth文件路径不可包含中文"))
                 return False
@@ -854,7 +854,7 @@ if __name__ == "__main__":
             global flag_vc
             start_time = time.perf_counter()
             indata = librosa.to_mono(indata.T)
-                # 🔹静音检测逻辑插入点 ①（在 librosa 增强前）
+            # 🔹静音检测逻辑插入点 ①（在 librosa 增强前）
             # if np.abs(indata).mean() < 1e-4:
             #     print("⛔️ 检测到静音或无效输入，跳过该帧")
             #     outdata[:] = np.zeros_like(outdata)
@@ -979,10 +979,10 @@ if __name__ == "__main__":
                 + 1e-8
             )
             if sys.platform == "darwin":
-                    # 需要指定dim，假设维度是0或1，先打印确认下形状
+                # 需要指定dim，假设维度是0或1，先打印确认下形状
                 # tensor = cor_nom[0, 0] / cor_den[0, 0]
                 # print("❌❌tensor shape:", tensor.shape)
-                #原代码采集音频是报0张量错误--------------litchee-----2025.06.01--
+                # 原代码采集音频是报0张量错误--------------litchee-----2025.06.01--
                 # _, sola_offset = torch.max(cor_nom[0, 0] / cor_den[0, 0])
                 _, sola_offset = torch.max(cor_nom[0, 0] / cor_den[0, 0], dim=0)
                 sola_offset = sola_offset.item()
@@ -1066,9 +1066,9 @@ if __name__ == "__main__":
         def get_device_samplerate(self):
             return int(
                 sd.query_devices(device=sd.default.device[0])["default_samplerate"]
-        
             )
-#重写函数
+
+        # 重写函数
         # def get_device_samplerate(self):
         #     try:
         #         info = sd.query_devices(device=sd.default.device[0])
@@ -1080,7 +1080,7 @@ if __name__ == "__main__":
         #     except Exception as e:
         #         print("[错误] 获取设备采样率失败：", e)
         #         return 44100  # fallback
-       
+
         def get_device_channels(self):
             max_input_channels = sd.query_devices(device=sd.default.device[0])[
                 "max_input_channels"
